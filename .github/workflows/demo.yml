@@ -1,0 +1,65 @@
+name: Deploy website
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+      - name: cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}  
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint code
+        run: npm run lint
+      - name: Test code
+        run: npm run test
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      output-script: ${{steps.publish.outputs.script-file}}
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}        
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+      - name: create a folder for artifacts
+        run: mkdir king
+      - run: ls    
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: king
+      - name: Publish js file name
+        id: publish
+        run: find king/**/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifacts
+        uses: actions/download-artfact@v4
+        with:
+          name: dist-files
+      - name: output contentes
+        run: ls
+      - name: output filename
+        run: echo "${{needs.build.outputs.output-script}}"      
+      - name: Deploy
+        run: echo "Deploying..."
