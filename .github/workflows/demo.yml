@@ -38,8 +38,8 @@ jobs:
       - name: Build website
         run: npm run build
       - name: create a folder for artifacts
-        run: mkdir king
-      - run: ls    
+        run: mkdir king;cp -r ./dist king
+      - run: ls king
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
