@@ -47,7 +47,7 @@ jobs:
           path: king
       - name: Publish js file name
         id: publish
-        run: find king/**/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
+        run: find king/dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
 
   deploy:
     needs: build
