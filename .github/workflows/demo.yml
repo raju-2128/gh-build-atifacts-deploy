@@ -37,24 +37,21 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
-      - name: create a folder for artifacts
-        run: mkdir king;cp -r ./dist king
-      - run: ls king
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist-files
-          path: king
+          path: dist
       - name: Publish js file name
         id: publish
-        run: find king/dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
+        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';'
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: download artifacts
-        uses: actions/download-artfact@v4
+        uses: actions/download-artifact@v4
         with:
           name: dist-files
       - name: output contentes
